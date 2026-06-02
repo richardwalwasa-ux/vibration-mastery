@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useLocation } from 'react-router'
 import { knowledgeSections, type ContentBlock } from '../data/knowledge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
@@ -60,14 +61,16 @@ function renderBlock(block: ContentBlock, idx: number) {
 }
 
 export default function Knowledge() {
+  const location = useLocation()
+
   useEffect(() => {
     if (location.hash) {
-      const el = document.querySelector(location.hash)
+      const el = document.getElementById(location.hash.slice(1))
       el?.scrollIntoView({ behavior: 'smooth' })
     } else {
       window.scrollTo(0, 0)
     }
-  }, [])
+  }, [location.hash])
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
