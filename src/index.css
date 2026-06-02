@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 25% 97%;
+    --foreground: 25 10% 16%;
+    --card: 30 25% 97%;
+    --card-foreground: 25 10% 16%;
+    --popover: 30 25% 97%;
+    --popover-foreground: 25 10% 16%;
+    --primary: 320 29% 32%;
+    --primary-foreground: 30 25% 97%;
+    --secondary: 135 15% 55%;
+    --secondary-foreground: 25 10% 16%;
+    --muted: 30 20% 93%;
+    --muted-foreground: 25 8% 40%;
+    --accent: 43 80% 38%;
+    --accent-foreground: 30 25% 97%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 320 29% 32%;
+    --radius: 0.625rem;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .gradient-plum {
+    background: linear-gradient(135deg, hsl(320, 29%, 32%) 0%, hsl(320, 20%, 45%) 100%);
+  }
+  .gradient-sage {
+    background: linear-gradient(135deg, hsl(135, 15%, 55%) 0%, hsl(135, 10%, 65%) 100%);
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, hsl(30, 25%, 97%) 0%, hsl(30, 20%, 92%) 100%);
+  }
+  .shadow-glow {
+    box-shadow: 0 0 40px rgba(107, 58, 91, 0.15);
+  }
+}
