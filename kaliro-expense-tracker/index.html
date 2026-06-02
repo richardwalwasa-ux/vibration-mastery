@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Site Expense Tracker - Kaliro Project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.4;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 { font-size: 1.3rem; margin-bottom: 5px; }
+        .header p  { font-size: 0.85rem; opacity: 0.9; }
+
+        /* ── Dashboard ── */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            margin: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .metric-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        .metric-card.alert   { border-left-color: #e74c3c; background: #fdf2f2; }
+        .metric-card.success { border-left-color: #27ae60; background: #f0fdf4; }
+        .metric-card.warning { border-left-color: #ff9800; background: #fff8e1; }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .metric-value { font-size: 1.2rem; font-weight: bold; color: #333; }
+        .metric-value.alert   { color: #e74c3c; }
+        .metric-value.success { color: #27ae60; }
+        .metric-value.warning { color: #ff9800; }
+
+        /* ── Sections ── */
+        .section {
+            background: white;
+            margin: 10px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .section-header button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* ── Forms ── */
+        .form-group {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .form-group:last-child { border-bottom: none; }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        textarea { min-height: 100px; resize: vertical; }
+
+        .input-row   { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; }
+        .input-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* ── Buttons ── */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            width: calc(100% - 20px);
+            margin: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+        .btn-secondary {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            width: calc(100% - 20px);
+            margin: 10px;
+            cursor: pointer;
+        }
+        .btn-warning {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            width: calc(100% - 20px);
+            margin: 10px;
+            cursor: pointer;
+        }
+        .btn-primary:active, .btn-secondary:active, .btn-warning:active {
+            transform: scale(0.98);
+        }
+
+        /* ── Entries list ── */
+        .entries-list { max-height: 350px; overflow-y: auto; }
+
+        .entry-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+        .entry-item:last-child { border-bottom: none; }
+
+        .entry-info  { flex: 1; min-width: 0; }
+        .entry-title { font-weight: 500; font-size: 0.95rem; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .entry-meta  { font-size: 0.8rem; color: #888; }
+
+        .entry-amount { font-weight: bold; font-size: 1rem; white-space: nowrap; }
+        .entry-amount.material  { color: #3498db; }
+        .entry-amount.wage      { color: #9b59b6; }
+        .entry-amount.operation { color: #f39c12; }
+        .entry-amount.fund      { color: #27ae60; }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* Inline delete confirmation row */
+        .delete-confirm {
+            background: #fff3cd;
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        .delete-confirm span { flex: 1; color: #856404; }
+        .delete-confirm button { padding: 5px 12px; border: none; border-radius: 5px; cursor: pointer; font-size: 0.8rem; }
+        .confirm-yes { background: #e74c3c; color: white; }
+        .confirm-no  { background: #6c757d; color: white; }
+
+        /* ── Alerts ── */
+        .alert-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin: 10px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .alert-box.danger  { background: #f8d7da; border-left-color: #dc3545; color: #721c24; }
+        .alert-box.success { background: #d4edda; border-left-color: #28a745; color: #155724; }
+        .alert-box.info    { background: #cce5ff; border-left-color: #004085; color: #004085; }
+
+        /* ── Summary table ── */
+        .summary-table { width: 100%; font-size: 0.9rem; }
+        .summary-table td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .summary-table td:last-child { text-align: right; font-weight: 600; }
+        .summary-table tr.total td  { font-weight: bold; background: #f8f9fa; font-size: 1rem; }
+        .summary-table tr.surplus td:last-child { color: #27ae60; }
+        .summary-table tr.deficit  td:last-child { color: #c62828; }
+
+        /* ── Tab navigation ── */
+        .tab-nav {
+            display: flex;
+            background: white;
+            margin: 10px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+        .tab-btn.active { background: #667eea; color: white; }
+
+        .tab-content         { display: none; }
+        .tab-content.active  { display: block; }
+
+        /* ── Rate checker ── */
+        .rate-checker { background: #e3f2fd; padding: 12px; margin: 10px; border-radius: 8px; font-size: 0.85rem; }
+        .rate-checker.savings { background: #e8f5e9; color: #2e7d32; }
+        .rate-checker.ok      { background: #e8f5e9; color: #2e7d32; }
+        .rate-checker.warning { background: #fff3e0; color: #ef6c00; }
+        .rate-checker.bad     { background: #ffebee; color: #c62828; }
+
+        /* ── Export section ── */
+        .export-section {
+            background: #e8f5e9;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 12px;
+            border: 2px solid #27ae60;
+        }
+        .export-title { font-weight: bold; color: #27ae60; margin-bottom: 10px; font-size: 1rem; }
+        .export-option {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+        }
+        .export-option:active { background: #f0f0f0; }
+
+        /* ── Backup reminder (NO pulsing — accessibility) ── */
+        .backup-reminder {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .backup-reminder h3  { margin-bottom: 8px; font-size: 1.1rem; }
+        .backup-reminder p   { font-size: 0.9rem; margin-bottom: 10px; opacity: 0.95; }
+        .dismiss-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        /* ── Data management ── */
+        .data-management {
+            background: #f3e5f5;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 12px;
+            border: 2px solid #9c27b0;
+        }
+        .data-management-title { font-weight: bold; color: #9c27b0; margin-bottom: 10px; font-size: 1rem; }
+        .last-backup {
+            font-size: 0.85rem;
+            color: #666;
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        /* ── Modal ── */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .modal-close { float: right; font-size: 1.5rem; cursor: pointer; color: #999; }
+
+        /* ── Stats grid ── */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .stat-box   { background: #f8f9fa; padding: 10px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 1.5rem; font-weight: bold; color: #667eea; }
+        .stat-label  { font-size: 0.75rem; color: #666; }
+
+        /* ── Toast notifications ── */
+        #toastContainer {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            width: 90%;
+            max-width: 360px;
+        }
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            pointer-events: auto;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .toast.show  { opacity: 1; transform: translateY(0); }
+        .toast.toast-success { background: #27ae60; }
+        .toast.toast-error   { background: #e74c3c; }
+        .toast.toast-warning { background: #ff9800; }
+        .toast.toast-info    { background: #3498db; }
+
+        /* ── Misc ── */
+        .hidden { display: none; }
+
+        .print-area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area {
+                display: block;
+                position: absolute;
+                left: 0; top: 0;
+                width: 100%;
+                padding: 20px;
+            }
+        }
+
+        /* ── Chips for entry type labels ── */
+        .type-chip {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .chip-material  { background: #dbeafe; color: #1d4ed8; }
+        .chip-wage      { background: #ede9fe; color: #6d28d9; }
+        .chip-operation { background: #fef3c7; color: #92400e; }
+        .chip-fund      { background: #d1fae5; color: #065f46; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Site Expense Tracker</h1>
+        <p>Kaliro Construction Project</p>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toastContainer"></div>
+
+    <!-- Backup Reminder (no pulsing animation) -->
+    <div id="backupReminder" class="backup-reminder hidden">
+        <h3>&#9888; Backup Reminder</h3>
+        <p id="backupMessage">You haven't backed up your data yet!</p>
+        <button type="button" class="dismiss-btn" onclick="dismissBackupReminder()">Dismiss</button>
+        <button type="button" class="dismiss-btn" onclick="showTab('export', document.querySelectorAll('.tab-btn')[3]); dismissBackupReminder();" style="margin-left: 10px;">Backup Now</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <div class="metric-card" id="bcfCard">
+            <div class="metric-label">Cumulative BCF</div>
+            <div class="metric-value" id="bcfValue">UGX 0</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Total Expenses</div>
+            <div class="metric-value" id="totalExpenses">UGX 0</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Funds Received</div>
+            <div class="metric-value success" id="totalFunds">UGX 0</div>
+        </div>
+        <div class="metric-card" id="deficitCard">
+            <div class="metric-label">Cash Position</div>
+            <div class="metric-value" id="cashPosition">UGX 0</div>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div id="alertsContainer"></div>
+
+    <!-- Tab Navigation -->
+    <!-- FIX: pass `this` instead of relying on the implicit global `event` object -->
+    <div class="tab-nav">
+        <button type="button" class="tab-btn active" onclick="showTab('entry', this)">Add</button>
+        <button type="button" class="tab-btn"        onclick="showTab('view', this)">View</button>
+        <button type="button" class="tab-btn"        onclick="showTab('summary', this)">Summary</button>
+        <button type="button" class="tab-btn"        onclick="showTab('export', this)">Export</button>
+    </div>
+
+    <!-- ─────────────────── ENTRY TAB ─────────────────── -->
+    <div id="entryTab" class="tab-content active">
+        <div class="section">
+            <div class="section-header"><span>Week Information</span></div>
+            <div class="form-group">
+                <label for="weekNumber">Week Number</label>
+                <!-- Extended to 26 weeks (half-year project) -->
+                <select id="weekNumber" onchange="loadWeekData()">
+                    <option value="1">Week 1</option><option value="2">Week 2</option>
+                    <option value="3">Week 3</option><option value="4">Week 4</option>
+                    <option value="5">Week 5</option><option value="6">Week 6</option>
+                    <option value="7">Week 7</option><option value="8">Week 8</option>
+                    <option value="9">Week 9</option><option value="10">Week 10</option>
+                    <option value="11">Week 11</option><option value="12">Week 12</option>
+                    <option value="13">Week 13</option><option value="14">Week 14</option>
+                    <option value="15">Week 15</option><option value="16">Week 16</option>
+                    <option value="17">Week 17</option><option value="18">Week 18</option>
+                    <option value="19">Week 19</option><option value="20">Week 20</option>
+                    <option value="21">Week 21</option><option value="22">Week 22</option>
+                    <option value="23">Week 23</option><option value="24">Week 24</option>
+                    <option value="25">Week 25</option><option value="26">Week 26</option>
+                </select>
+            </div>
+            <div class="input-row-2">
+                <div class="form-group">
+                    <label for="weekStart">Start Date</label>
+                    <input type="date" id="weekStart" onchange="saveWeekDates()">
+                </div>
+                <div class="form-group">
+                    <label for="weekEnd">End Date</label>
+                    <input type="date" id="weekEnd" onchange="saveWeekDates()">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header"><span>Add Expense / Fund</span></div>
+
+            <div class="form-group">
+                <label for="entryType">Type</label>
+                <select id="entryType" onchange="updateForm()">
+                    <option value="material">Materials</option>
+                    <option value="wage">Wages</option>
+                    <option value="operation">Operations</option>
+                    <option value="fund">Funds Received</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" id="description" placeholder="e.g., Cement, Block Laying, Feeding"
+                    oninput="checkRate()">
+            </div>
+
+            <div id="rateChecker" class="rate-checker hidden"></div>
+
+            <div class="input-row">
+                <div class="form-group">
+                    <label for="quantity">Qty / Days</label>
+                    <!-- min="0" prevents negative quantities -->
+                    <input type="number" id="quantity" placeholder="0" min="0" step="any"
+                        oninput="calculateAmount()">
+                </div>
+                <div class="form-group">
+                    <label for="unit">Unit</label>
+                    <select id="unit">
+                        <option value="pcs">pcs</option>
+                        <option value="bags">bags</option>
+                        <option value="LM">LM</option>
+                        <option value="Item">Item</option>
+                        <option value="Days">Days</option>
+                        <option value="Trips">Trips</option>
+                        <option value="Kgs">Kgs</option>
+                        <option value="Roll">Roll</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="rate">Rate (UGX)</label>
+                    <input type="number" id="rate" placeholder="0" min="0" step="any"
+                        oninput="calculateAmount(); checkRate()">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Total Amount (UGX)</label>
+                <input type="number" id="amount" placeholder="0" min="0" step="any"
+                    style="font-size: 1.1rem; font-weight: bold;">
+            </div>
+
+            <div class="form-group" id="paymentMethod" style="display: none;">
+                <label for="paidBy">Payment Method</label>
+                <select id="paidBy">
+                    <option value="cash">Cash from Funds</option>
+                    <option value="client">Paid by Client Direct</option>
+                    <option value="credit">Supplier Credit</option>
+                    <option value="site">Paid on Site</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="button" class="btn-primary" onclick="addEntry()">Save Entry</button>
+    </div>
+
+    <!-- ─────────────────── VIEW TAB ─────────────────── -->
+    <div id="viewTab" class="tab-content">
+        <div class="section">
+            <div class="section-header">
+                <span>This Week's Entries</span>
+                <button type="button" onclick="clearWeek()" style="background: #e74c3c;">Clear</button>
+            </div>
+            <div class="entries-list" id="entriesList">
+                <div style="padding: 20px; text-align: center; color: #888;">
+                    No entries yet. Add your first expense!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─────────────────── SUMMARY TAB ─────────────────── -->
+    <div id="summaryTab" class="tab-content">
+        <div class="section">
+            <div class="section-header"><span>Week Summary</span></div>
+            <table class="summary-table">
+                <tr><td>Materials</td>  <td id="sumMaterials">UGX 0</td></tr>
+                <tr><td>Wages</td>      <td id="sumWages">UGX 0</td></tr>
+                <tr><td>Operations</td> <td id="sumOperations">UGX 0</td></tr>
+                <tr class="total"><td>Total Expenses</td><td id="sumTotalExp">UGX 0</td></tr>
+                <tr style="height:10px;"><td colspan="2"></td></tr>
+                <tr><td>Funds Received</td><td id="sumFunds" style="color:#27ae60;">UGX 0</td></tr>
+                <tr class="total"><td>Net Position</td><td id="sumNet">UGX 0</td></tr>
+                <tr style="height:10px;"><td colspan="2"></td></tr>
+                <tr style="background:#e3f2fd;">
+                    <td><strong>BCF (Cumulative Balance)</strong></td>
+                    <td id="sumBCF"><strong>UGX 0</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-header"><span>Forensic Flags</span></div>
+            <div id="forensicFlags" style="padding: 15px;">
+                <p style="color: #888; font-size: 0.9rem;">No flags detected yet.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header"><span>Project Statistics</span></div>
+            <div class="stats-grid" style="padding: 15px;">
+                <div class="stat-box"><div class="stat-number" id="statWeeks">0</div><div class="stat-label">Active Weeks</div></div>
+                <div class="stat-box"><div class="stat-number" id="statEntries">0</div><div class="stat-label">Total Entries</div></div>
+                <div class="stat-box"><div class="stat-number" id="statMaterials">0</div><div class="stat-label">Material Items</div></div>
+                <div class="stat-box"><div class="stat-number" id="statWages">0</div><div class="stat-label">Wage Entries</div></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header"><span>Project Totals (All Weeks)</span></div>
+            <table class="summary-table">
+                <tr><td>Total Materials</td>   <td id="projMaterials">UGX 0</td></tr>
+                <tr><td>Total Wages</td>        <td id="projWages">UGX 0</td></tr>
+                <tr><td>Total Operations</td>   <td id="projOperations">UGX 0</td></tr>
+                <tr class="total"><td>Project Expenses</td><td id="projTotalExp">UGX 0</td></tr>
+                <tr><td>Total Funds</td>        <td id="projFunds" style="color:#27ae60;">UGX 0</td></tr>
+                <!-- FIX: label & colour change based on actual surplus/deficit -->
+                <tr class="total" id="projNetRow">
+                    <td id="projNetLabel"><strong>Project Position</strong></td>
+                    <td id="projDeficit"><strong>UGX 0</strong></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="data-management">
+            <div class="data-management-title">Data Management &amp; Backup</div>
+            <div class="last-backup" id="lastBackupInfo">Last backup: Never</div>
+            <button type="button" class="btn-warning"   onclick="exportDataCode()">Export Data Code (Backup)</button>
+            <button type="button" class="btn-secondary" onclick="downloadJSON()" style="background:#3498db; margin-top:5px;">Download JSON Backup</button>
+            <button type="button" class="btn-secondary" onclick="showImportModal()" style="margin-top:5px;">Import Data Code</button>
+            <p style="font-size:0.8rem; color:#666; margin-top:10px;">
+                "Export Data Code" creates a text backup you can paste to restore data.
+                "Download JSON" saves a readable file to your device.
+            </p>
+        </div>
+    </div>
+
+    <!-- ─────────────────── EXPORT TAB ─────────────────── -->
+    <div id="exportTab" class="tab-content">
+        <div class="export-section">
+            <div class="export-title">Export Reports</div>
+            <p style="font-size:0.85rem; color:#666; margin-bottom:15px;">
+                Generate reports to share via WhatsApp
+            </p>
+
+            <div class="export-option" onclick="generateTextReport('current')">
+                <strong>Current Week Report (Text)</strong><br>
+                <span style="font-size:0.8rem; color:#666;">Week <span id="exportWeekNum">1</span> — copy and share</span>
+            </div>
+            <div class="export-option" onclick="generateTextReport('detailed')">
+                <strong>Detailed Week Report (Text)</strong><br>
+                <span style="font-size:0.8rem; color:#666;">Full breakdown with rates and payment methods</span>
+            </div>
+            <div class="export-option" onclick="generateTextReport('all')">
+                <strong>Full Project Report (Text)</strong><br>
+                <span style="font-size:0.8rem; color:#666;">All weeks with totals</span>
+            </div>
+            <div class="export-option" onclick="generateTextReport('summary')">
+                <strong>Financial Summary Only (Text)</strong><br>
+                <span style="font-size:0.8rem; color:#666;">Compact overview for quick review</span>
+            </div>
+            <div class="export-option" onclick="window.print()">
+                <strong>Print / Save as PDF</strong><br>
+                <span style="font-size:0.8rem; color:#666;">Use phone's print to PDF feature</span>
+            </div>
+        </div>
+
+        <div class="section" style="margin-top:20px;">
+            <div class="section-header"><span>How to Share</span></div>
+            <div style="padding:15px; font-size:0.9rem; line-height:1.6;">
+                <p><strong>1.</strong> Tap a report option above</p>
+                <p><strong>2.</strong> Text report will appear — copy it</p>
+                <p><strong>3.</strong> Paste into WhatsApp and send</p>
+                <p><strong>4.</strong> Or use "Print" to create PDF</p>
+                <br>
+                <p style="color:#666; font-size:0.8rem;">
+                    <strong>Recommended:</strong> Export weekly every Friday
+                </p>
+            </div>
+        </div>
+
+        <div class="section" style="margin-top:20px;">
+            <div class="section-header"><span>Backup Settings</span></div>
+            <div style="padding:15px;">
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="autoBackupEnabled" checked onchange="toggleAutoBackup()">
+                        Enable automatic backup reminders
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label for="backupFrequency">Remind me every:</label>
+                    <select id="backupFrequency" onchange="updateBackupSettings()">
+                        <option value="3">3 days</option>
+                        <option value="7" selected>7 days (weekly)</option>
+                        <option value="14">14 days</option>
+                    </select>
+                </div>
+                <div class="last-backup" id="nextBackupDue">Next reminder: Calculating...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generated Report Display -->
+    <div id="textReportArea" class="section hidden" style="margin-top:20px;">
+        <div class="section-header">
+            <span>Generated Report</span>
+            <button type="button" onclick="copyReportToClipboard()" style="background:#27ae60;">Copy</button>
+        </div>
+        <div style="padding:15px;">
+            <textarea id="reportText" readonly style="width:100%; min-height:300px; font-family:monospace; font-size:0.85rem;"></textarea>
+        </div>
+        <button type="button" class="btn-secondary" onclick="shareReportViaWhatsApp()">Share via WhatsApp</button>
+        <button type="button" class="btn-primary"   onclick="hideTextReport()">Close</button>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Import Data Code
+                <span class="modal-close" onclick="closeImportModal()">&times;</span>
+            </div>
+            <p style="font-size:0.9rem; margin-bottom:15px;">Paste your exported data code below:</p>
+            <textarea id="importDataText" placeholder="Paste data code here..."></textarea>
+            <button type="button" class="btn-primary"    onclick="importDataCode()" style="margin-top:15px;">Import Data</button>
+            <button type="button" class="btn-secondary"  onclick="closeImportModal()" style="margin-top:10px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Export (Backup Code) Modal -->
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Data Backup Code
+                <span class="modal-close" onclick="closeExportModal()">&times;</span>
+            </div>
+            <p style="font-size:0.9rem; margin-bottom:5px;">Copy this code and save it safely:</p>
+            <p style="font-size:0.8rem; color:#888; margin-bottom:10px;">
+                (This is a Base64-encoded copy of your data — not encrypted.)
+            </p>
+            <textarea id="exportDataText" readonly style="font-size:0.75rem; min-height:150px;"></textarea>
+            <button type="button" class="btn-primary"   onclick="copyExportCode()" style="margin-top:15px;">Copy to Clipboard</button>
+            <button type="button" class="btn-secondary" onclick="shareViaWhatsApp()" style="margin-top:10px;">Share via WhatsApp</button>
+            <button type="button" class="btn-secondary" onclick="closeExportModal()" style="margin-top:10px;">Close</button>
+        </div>
+    </div>
+
+    <!-- Print Area -->
+    <div id="printArea" class="print-area"></div>
+
+    <script>
+        // ─────────────────────────────────────────────────────
+        //  Data
+        // ─────────────────────────────────────────────────────
+        let appData = {
+            currentWeek: 1,
+            weeks: {},
+            settings: {
+                autoBackup: true,
+                backupFrequency: 7,
+                lastBackup: null,
+                dismissedUntil: null
+            }
+        };
+
+        const marketRates = {
+            'Cement':      { min: 28000,  max: 32000,  unit: 'bag',  keywords: ['cement'] },
+            'Bricks':      { min: 180,    max: 220,    unit: 'pc',   keywords: ['bricks', 'brick'] },
+            'Block':       { min: 12000,  max: 18000,  unit: 'LM',   keywords: ['block', 'block laying'] },
+            'Plinth':      { min: 6000,   max: 8500,   unit: 'LM',   keywords: ['plinth', 'stone'] },
+            'Excavation':  { min: 2500,   max: 4000,   unit: 'LM',   keywords: ['excavation', 'trench'] },
+            'Hardcore':    { min: 150000, max: 200000, unit: 'trip', keywords: ['hardcore'] },
+            'PVC':         { min: 20000,  max: 30000,  unit: 'pc',   keywords: ['pvc', 'pipe'] },
+            'Eucalyptus':  { min: 8000,   max: 12000,  unit: 'pc',   keywords: ['eucalyptus', 'pole'] }
+        };
+
+        // ─────────────────────────────────────────────────────
+        //  Helpers
+        // ─────────────────────────────────────────────────────
+
+        /** Safely escape user text before inserting into innerHTML. */
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(str)));
+            return div.innerHTML;
+        }
+
+        /** Non-blocking toast notification. */
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast toast-' + type;
+            toast.textContent = message;
+            container.appendChild(toast);
+            // Force reflow then animate in
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => toast.classList.add('show'));
+            });
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        /**
+         * Copy text to clipboard using the modern Clipboard API with
+         * a textarea-based fallback for older browsers / WebViews.
+         */
+        async function copyToClipboard(text, successMsg) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showToast(successMsg || 'Copied!', 'success');
+                    return;
+                } catch (e) {
+                    // fall through to legacy path
+                }
+            }
+            // Legacy fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast(successMsg || 'Copied!', 'success');
+            } catch (e) {
+                showToast('Could not copy — please select text and copy manually.', 'warning');
+            }
+            document.body.removeChild(ta);
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Persistence
+        // ─────────────────────────────────────────────────────
+        function saveData() {
+            try {
+                localStorage.setItem('kaliroExpenses', JSON.stringify(appData));
+            } catch (e) {
+                showToast('Warning: Could not save data — storage may be full.', 'warning');
+            }
+        }
+
+        function init() {
+            try {
+                const saved = localStorage.getItem('kaliroExpenses');
+                if (saved) {
+                    appData = JSON.parse(saved);
+                    if (!appData.settings) {
+                        appData.settings = {
+                            autoBackup: true, backupFrequency: 7,
+                            lastBackup: null, dismissedUntil: null
+                        };
+                    }
+                    document.getElementById('weekNumber').value = appData.currentWeek;
+                    document.getElementById('autoBackupEnabled').checked = appData.settings.autoBackup;
+                    document.getElementById('backupFrequency').value = appData.settings.backupFrequency;
+                }
+            } catch (e) {
+                console.log('No saved data found');
+            }
+            updateDashboard();
+            loadWeekData();
+            checkBackupReminder();
+            updateBackupDisplay();
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Backup / reminder
+        // ─────────────────────────────────────────────────────
+        function checkBackupReminder() {
+            if (!appData.settings.autoBackup) return;
+            const now = Date.now();
+            const { lastBackup, dismissedUntil, backupFrequency } = appData.settings;
+            if (dismissedUntil && now < dismissedUntil) return;
+            const freq = backupFrequency * 24 * 60 * 60 * 1000;
+            if (!lastBackup || (now - lastBackup) > freq) {
+                const days = lastBackup ? Math.floor((now - lastBackup) / 86400000) : null;
+                document.getElementById('backupMessage').textContent = days
+                    ? 'You haven\'t backed up in ' + days + ' days. Export to keep records safe!'
+                    : 'You haven\'t backed up your data yet. Create a backup now!';
+                document.getElementById('backupReminder').classList.remove('hidden');
+            }
+        }
+
+        function dismissBackupReminder() {
+            appData.settings.dismissedUntil = Date.now() + 86400000;
+            saveData();
+            document.getElementById('backupReminder').classList.add('hidden');
+        }
+
+        function toggleAutoBackup() {
+            appData.settings.autoBackup = document.getElementById('autoBackupEnabled').checked;
+            saveData();
+            updateBackupDisplay();
+        }
+
+        function updateBackupSettings() {
+            appData.settings.backupFrequency = parseInt(document.getElementById('backupFrequency').value);
+            saveData();
+            updateBackupDisplay();
+        }
+
+        function updateBackupDisplay() {
+            const { lastBackup, backupFrequency } = appData.settings;
+            if (lastBackup) {
+                const d = new Date(lastBackup);
+                document.getElementById('lastBackupInfo').textContent =
+                    'Last backup: ' + d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+                const next = new Date(lastBackup + backupFrequency * 86400000);
+                document.getElementById('nextBackupDue').textContent =
+                    'Next reminder: ' + next.toLocaleDateString();
+            } else {
+                document.getElementById('lastBackupInfo').textContent = 'Last backup: Never';
+                document.getElementById('nextBackupDue').textContent  = 'Next reminder: After first backup';
+            }
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Export / Import
+        // ─────────────────────────────────────────────────────
+        function exportDataCode() {
+            try {
+                document.getElementById('exportDataText').value = btoa(JSON.stringify(appData));
+                document.getElementById('exportModal').classList.add('active');
+                appData.settings.lastBackup = Date.now();
+                saveData();
+                updateBackupDisplay();
+                dismissBackupReminder();
+            } catch (e) {
+                showToast('Error creating backup: ' + e.message, 'error');
+            }
+        }
+
+        /** New: download raw JSON file to device. */
+        function downloadJSON() {
+            try {
+                const json = JSON.stringify(appData, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement('a');
+                a.href     = url;
+                a.download = 'kaliro-expenses-' + new Date().toISOString().slice(0, 10) + '.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                appData.settings.lastBackup = Date.now();
+                saveData();
+                updateBackupDisplay();
+                showToast('JSON backup downloaded!', 'success');
+            } catch (e) {
+                showToast('Download failed: ' + e.message, 'error');
+            }
+        }
+
+        function copyExportCode() {
+            copyToClipboard(document.getElementById('exportDataText').value, 'Data code copied! Save it safely.');
+        }
+
+        function shareViaWhatsApp() {
+            const code = document.getElementById('exportDataText').value;
+            window.open('https://wa.me/?text=' + encodeURIComponent('Kaliro Backup Code:\n\n' + code), '_blank');
+        }
+
+        function showImportModal()  { document.getElementById('importModal').classList.add('active'); }
+        function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
+        function closeExportModal() { document.getElementById('exportModal').classList.remove('active'); }
+
+        function importDataCode() {
+            const code = document.getElementById('importDataText').value.trim();
+            if (!code) { showToast('Please paste a data code', 'warning'); return; }
+            try {
+                const imported = JSON.parse(atob(code));
+                if (!confirm('This will replace all current data. Are you sure?')) return;
+                appData = imported;
+                if (!appData.settings) {
+                    appData.settings = { autoBackup: true, backupFrequency: 7, lastBackup: null, dismissedUntil: null };
+                }
+                saveData();
+                showToast('Data imported! Reloading…', 'success');
+                setTimeout(() => location.reload(), 800);
+            } catch (e) {
+                showToast('Invalid data code — please check and try again.', 'error');
+            }
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Tab switching
+        //  FIX: accept the button element explicitly — the original
+        //  code relied on the implicit global `event` object which
+        //  is not reliable in all browsers / strict-mode environments.
+        // ─────────────────────────────────────────────────────
+        function showTab(tab, btn) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+            if (btn) btn.classList.add('active');
+
+            if (tab === 'view')    renderEntries();
+            if (tab === 'summary') updateSummary();
+            if (tab === 'export')  updateExportWeek();
+        }
+
+        function updateExportWeek() {
+            document.getElementById('exportWeekNum').textContent = appData.currentWeek;
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Form helpers
+        // ─────────────────────────────────────────────────────
+        function updateForm() {
+            const type = document.getElementById('entryType').value;
+            document.getElementById('paymentMethod').style.display = type === 'material' ? 'block' : 'none';
+            document.getElementById('rateChecker').classList.add('hidden');
+        }
+
+        function calculateAmount() {
+            const qty  = parseFloat(document.getElementById('quantity').value) || 0;
+            const rate = parseFloat(document.getElementById('rate').value)     || 0;
+            document.getElementById('amount').value = qty * rate || '';
+        }
+
+        function checkRate() {
+            const desc    = document.getElementById('description').value.toLowerCase();
+            const rate    = parseFloat(document.getElementById('rate').value) || 0;
+            const checker = document.getElementById('rateChecker');
+
+            if (!desc || !rate) { checker.classList.add('hidden'); return; }
+
+            for (const [, data] of Object.entries(marketRates)) {
+                if (data.keywords.some(k => desc.includes(k))) {
+                    let cls, msg;
+                    if (rate < data.min) {
+                        // FIX: below market is a potential saving — show as info/savings, not "bad"
+                        cls = 'rate-checker savings';
+                        msg = '&#9650; Below market (saving?) — Market: ' +
+                              data.min.toLocaleString() + '–' + data.max.toLocaleString();
+                    } else if (rate > data.max) {
+                        cls = 'rate-checker bad';
+                        msg = '&#9888; Above market rate! — Market: ' +
+                              data.min.toLocaleString() + '–' + data.max.toLocaleString();
+                    } else {
+                        cls = 'rate-checker ok';
+                        msg = '&#10003; Within market rate — Market: ' +
+                              data.min.toLocaleString() + '–' + data.max.toLocaleString();
+                    }
+                    checker.className = cls;
+                    checker.innerHTML = msg;
+                    checker.classList.remove('hidden');
+                    return;
+                }
+            }
+            checker.classList.add('hidden');
+        }
+
+        function saveWeekDates() {
+            const week = appData.currentWeek;
+            if (!appData.weeks[week]) appData.weeks[week] = { entries: [], startDate: '', endDate: '' };
+            appData.weeks[week].startDate = document.getElementById('weekStart').value;
+            appData.weeks[week].endDate   = document.getElementById('weekEnd').value;
+            saveData();
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Entry CRUD
+        // ─────────────────────────────────────────────────────
+        function addEntry() {
+            const week   = appData.currentWeek;
+            const type   = document.getElementById('entryType').value;
+            const desc   = document.getElementById('description').value.trim();
+            const qty    = parseFloat(document.getElementById('quantity').value) || 0;
+            const unit   = document.getElementById('unit').value;
+            const rate   = parseFloat(document.getElementById('rate').value) || 0;
+            const amount = parseFloat(document.getElementById('amount').value) || 0;
+            const paidBy = document.getElementById('paidBy').value;
+
+            if (!desc)    { showToast('Please enter a description', 'warning'); return; }
+            if (amount <= 0) { showToast('Please enter a valid amount greater than 0', 'warning'); return; }
+
+            if (!appData.weeks[week]) {
+                appData.weeks[week] = {
+                    entries: [],
+                    startDate: document.getElementById('weekStart').value,
+                    endDate:   document.getElementById('weekEnd').value
+                };
+            }
+
+            appData.weeks[week].entries.push({
+                id: Date.now(),
+                type, description: desc, quantity: qty, unit, rate, amount,
+                paidBy: type === 'material' ? paidBy : 'cash',
+                date: new Date().toISOString()
+            });
+
+            saveData();
+            updateDashboard();
+
+            document.getElementById('description').value = '';
+            document.getElementById('quantity').value    = '';
+            document.getElementById('rate').value        = '';
+            document.getElementById('amount').value      = '';
+            document.getElementById('rateChecker').classList.add('hidden');
+
+            showToast('Entry saved!', 'success');
+        }
+
+        function loadWeekData() {
+            const week = parseInt(document.getElementById('weekNumber').value);
+            appData.currentWeek = week;
+            const w = appData.weeks[week];
+            document.getElementById('weekStart').value = w ? (w.startDate || '') : '';
+            document.getElementById('weekEnd').value   = w ? (w.endDate   || '') : '';
+            updateDashboard();
+            renderEntries();
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Calculations
+        // ─────────────────────────────────────────────────────
+        function calculateWeek(weekNum) {
+            const week = appData.weeks[weekNum];
+            if (!week) return { materials: 0, wages: 0, operations: 0, funds: 0, cashExpense: 0 };
+
+            return week.entries.reduce((t, e) => {
+                switch (e.type) {
+                    case 'fund':      t.funds      += e.amount; break;
+                    case 'material':  t.materials  += e.amount; if (e.paidBy === 'cash') t.cashExpense += e.amount; break;
+                    case 'wage':      t.wages       += e.amount; t.cashExpense += e.amount; break;
+                    case 'operation': t.operations  += e.amount; t.cashExpense += e.amount; break;
+                }
+                return t;
+            }, { materials: 0, wages: 0, operations: 0, funds: 0, cashExpense: 0 });
+        }
+
+        /**
+         * FIX: cumulative BCF.
+         * The original code only looked one week back (prevWeek = currentWeek - 1),
+         * which gave a wrong balance for any project spanning more than two weeks.
+         * The correct approach is to sum (funds - cashExpense) across ALL weeks up
+         * to and including the selected week.
+         */
+        function calculateCumulativeBCF(upToWeek) {
+            let bcf = 0;
+            for (let w = 1; w <= upToWeek; w++) {
+                const t = calculateWeek(w);
+                bcf += (t.funds - t.cashExpense);
+            }
+            return bcf;
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Dashboard
+        // ─────────────────────────────────────────────────────
+        function updateDashboard() {
+            const week    = appData.currentWeek;
+            const current = calculateWeek(week);
+            const bcf     = calculateCumulativeBCF(week);
+            const net     = current.funds - current.cashExpense;
+            const totalExp = current.materials + current.wages + current.operations;
+
+            document.getElementById('bcfValue').textContent      = 'UGX ' + bcf.toLocaleString();
+            document.getElementById('totalExpenses').textContent  = 'UGX ' + totalExp.toLocaleString();
+            document.getElementById('totalFunds').textContent     = 'UGX ' + current.funds.toLocaleString();
+            document.getElementById('cashPosition').textContent   = 'UGX ' + net.toLocaleString();
+
+            setCardVariant('bcfCard',    'bcfValue',    bcf < 0);
+            setCardVariant('deficitCard','cashPosition', net < 0);
+
+            generateAlerts(current, bcf);
+        }
+
+        function setCardVariant(cardId, valueId, isAlert) {
+            const card = document.getElementById(cardId);
+            const val  = document.getElementById(valueId);
+            if (isAlert) {
+                card.classList.add('alert');
+                val.classList.add('alert');
+            } else {
+                card.classList.remove('alert');
+                val.classList.remove('alert');
+            }
+        }
+
+        function generateAlerts(totals, bcf) {
+            const totalExp = totals.materials + totals.wages + totals.operations;
+            const alerts   = [];
+
+            if (bcf < -1000000) {
+                alerts.push('<div class="alert-box danger">CRITICAL: BCF deficit exceeds UGX 1M — stop non-essential spending!</div>');
+            } else if (bcf < 0) {
+                alerts.push('<div class="alert-box danger">Negative BCF: UGX ' + Math.abs(bcf).toLocaleString() + '</div>');
+            }
+            if (totalExp > 0 && totals.funds / totalExp < 0.5) {
+                alerts.push('<div class="alert-box">Funding coverage: ' + Math.round((totals.funds / totalExp) * 100) + '% — request more funds</div>');
+            }
+            if (totals.materials > 2000000) {
+                alerts.push('<div class="alert-box">High materials week — verify delivery notes</div>');
+            }
+
+            document.getElementById('alertsContainer').innerHTML = alerts.join('');
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Entry rendering
+        // ─────────────────────────────────────────────────────
+        const TYPE_LABELS = { material: 'MAT', wage: 'LAB', operation: 'OPS', fund: 'FUND' };
+        const TYPE_CHIP   = { material: 'chip-material', wage: 'chip-wage', operation: 'chip-operation', fund: 'chip-fund' };
+        const AMOUNT_CLASS = { material: 'material', wage: 'wage', operation: 'operation', fund: 'fund' };
+
+        function renderEntries() {
+            const week      = appData.currentWeek;
+            const container = document.getElementById('entriesList');
+            const weekData  = appData.weeks[week];
+
+            if (!weekData || weekData.entries.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">No entries yet. Add your first expense!</div>';
+                return;
+            }
+
+            let html = '';
+            // FIX: e.description is HTML-escaped before insertion to prevent XSS
+            [...weekData.entries].reverse().forEach(e => {
+                const meta = (e.quantity > 0 ? e.quantity + ' ' + e.unit + ' @ ' : '') +
+                             (e.rate > 0 ? 'UGX ' + e.rate.toLocaleString() : '');
+
+                html += `
+                <div class="entry-item" id="entry-${e.id}">
+                    <div class="entry-info">
+                        <div class="entry-title">
+                            <span class="type-chip ${TYPE_CHIP[e.type]}">${TYPE_LABELS[e.type]}</span>
+                            ${escapeHtml(e.description)}
+                        </div>
+                        ${meta ? '<div class="entry-meta">' + escapeHtml(meta) + '</div>' : ''}
+                    </div>
+                    <div class="entry-amount ${AMOUNT_CLASS[e.type]}">UGX ${e.amount.toLocaleString()}</div>
+                    <button type="button" class="delete-btn" onclick="confirmDelete(${e.id})">Delete</button>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        /**
+         * Inline delete confirmation — avoids the blocking browser confirm() dialog
+         * which can be jarring on mobile and looks inconsistent.
+         */
+        function confirmDelete(id) {
+            // Remove any existing confirm rows
+            document.querySelectorAll('.delete-confirm').forEach(r => r.remove());
+
+            const row = document.getElementById('entry-' + id);
+            if (!row) return;
+
+            const confirm = document.createElement('div');
+            confirm.className = 'delete-confirm';
+            confirm.id = 'confirm-' + id;
+            confirm.innerHTML = `
+                <span>Delete this entry?</span>
+                <button type="button" class="confirm-yes" onclick="deleteEntry(${id})">Yes, delete</button>
+                <button type="button" class="confirm-no"  onclick="this.closest('.delete-confirm').remove()">Cancel</button>
+            `;
+            row.insertAdjacentElement('afterend', confirm);
+        }
+
+        function deleteEntry(id) {
+            const week = appData.currentWeek;
+            if (appData.weeks[week]) {
+                appData.weeks[week].entries = appData.weeks[week].entries.filter(e => e.id !== id);
+                saveData();
+                updateDashboard();
+                renderEntries();
+                showToast('Entry deleted', 'info');
+            }
+        }
+
+        function clearWeek() {
+            if (!confirm('Clear all entries for Week ' + appData.currentWeek + '?')) return;
+            if (appData.weeks[appData.currentWeek]) {
+                appData.weeks[appData.currentWeek].entries = [];
+                saveData();
+                updateDashboard();
+                renderEntries();
+                showToast('Week cleared', 'info');
+            }
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Summary tab
+        // ─────────────────────────────────────────────────────
+        function updateSummary() {
+            const week   = appData.currentWeek;
+            const totals = calculateWeek(week);
+            const bcf    = calculateCumulativeBCF(week);
+            const totalExp = totals.materials + totals.wages + totals.operations;
+            const net      = totals.funds - totals.cashExpense;
+
+            document.getElementById('sumMaterials').textContent  = 'UGX ' + totals.materials.toLocaleString();
+            document.getElementById('sumWages').textContent      = 'UGX ' + totals.wages.toLocaleString();
+            document.getElementById('sumOperations').textContent = 'UGX ' + totals.operations.toLocaleString();
+            document.getElementById('sumTotalExp').textContent   = 'UGX ' + totalExp.toLocaleString();
+            document.getElementById('sumFunds').textContent      = 'UGX ' + totals.funds.toLocaleString();
+
+            const netEl = document.getElementById('sumNet');
+            netEl.textContent  = 'UGX ' + net.toLocaleString();
+            netEl.style.color  = net >= 0 ? '#27ae60' : '#e74c3c';
+
+            const bcfEl = document.getElementById('sumBCF');
+            bcfEl.innerHTML    = '<strong>UGX ' + bcf.toLocaleString() + '</strong>';
+            bcfEl.style.color  = bcf >= 0 ? '#27ae60' : '#e74c3c';
+
+            // Forensic flags
+            const flags = [];
+            if (bcf < 0)                                              flags.push('&#9888; Negative BCF: Cash flow deficit');
+            if (totalExp > 0 && totals.funds < totals.cashExpense * 0.5) flags.push('&#9888; Low funding coverage (&lt;50%)');
+            if (totals.materials > 2000000)                           flags.push('&#9888; High materials spend — verify deliveries');
+            if (totals.wages > 2000000)                               flags.push('&#9888; High labour costs — verify output');
+
+            document.getElementById('forensicFlags').innerHTML = flags.length
+                ? flags.map(f => '<p style="margin:5px 0; font-size:0.9rem;">' + f + '</p>').join('')
+                : '<p style="color:#888; font-size:0.9rem;">No flags this week.</p>';
+
+            // Statistics
+            let proj = { materials: 0, wages: 0, operations: 0, funds: 0, cashExpense: 0 };
+            let activeWeeks = 0, totalEntries = 0, materialItems = 0, wageItems = 0;
+
+            for (let w = 1; w <= 26; w++) {
+                if (appData.weeks[w]) {
+                    activeWeeks++;
+                    const t = calculateWeek(w);
+                    proj.materials  += t.materials;
+                    proj.wages      += t.wages;
+                    proj.operations += t.operations;
+                    proj.funds      += t.funds;
+                    proj.cashExpense += t.cashExpense;
+                    totalEntries    += appData.weeks[w].entries.length;
+                    appData.weeks[w].entries.forEach(e => {
+                        if (e.type === 'material') materialItems++;
+                        if (e.type === 'wage')     wageItems++;
+                    });
+                }
+            }
+
+            document.getElementById('statWeeks').textContent     = activeWeeks;
+            document.getElementById('statEntries').textContent   = totalEntries;
+            document.getElementById('statMaterials').textContent = materialItems;
+            document.getElementById('statWages').textContent     = wageItems;
+
+            document.getElementById('projMaterials').textContent  = 'UGX ' + proj.materials.toLocaleString();
+            document.getElementById('projWages').textContent      = 'UGX ' + proj.wages.toLocaleString();
+            document.getElementById('projOperations').textContent = 'UGX ' + proj.operations.toLocaleString();
+            const projExp  = proj.materials + proj.wages + proj.operations;
+            document.getElementById('projTotalExp').textContent   = 'UGX ' + projExp.toLocaleString();
+            document.getElementById('projFunds').textContent      = 'UGX ' + proj.funds.toLocaleString();
+
+            // FIX: show "Surplus" or "Deficit" based on actual sign
+            const projNet  = proj.funds - projExp;
+            const netLabel = projNet >= 0 ? 'Project Surplus' : 'Project Deficit';
+            const netColor = projNet >= 0 ? '#27ae60' : '#c62828';
+            document.getElementById('projNetLabel').innerHTML = '<strong>' + netLabel + '</strong>';
+            const defEl = document.getElementById('projDeficit');
+            defEl.innerHTML  = '<strong>UGX ' + Math.abs(projNet).toLocaleString() + '</strong>';
+            defEl.style.color = netColor;
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Report generation
+        // ─────────────────────────────────────────────────────
+        function ugx(n) { return 'UGX ' + n.toLocaleString(); }
+
+        function generateTextReport(type) {
+            const now   = new Date().toLocaleString();
+            const lines = [
+                '========================================',
+                '  KALIRO CONSTRUCTION EXPENSE REPORT',
+                '  Generated: ' + now,
+                '========================================'
+            ];
+
+            if (type === 'current' || type === 'detailed') {
+                const week     = appData.currentWeek;
+                const weekData = appData.weeks[week];
+                const t        = calculateWeek(week);
+                const isDetail = type === 'detailed';
+
+                lines.push('', (isDetail ? 'DETAILED ' : '') + 'WEEK ' + week + ' REPORT',
+                    '----------------------------------------');
+                if (weekData && weekData.startDate) {
+                    lines.push('Period: ' + weekData.startDate + ' to ' + weekData.endDate);
+                }
+                lines.push('',
+                    'FINANCIAL SUMMARY:',
+                    '  Materials:          ' + ugx(t.materials),
+                    '  Wages:              ' + ugx(t.wages),
+                    '  Operations:         ' + ugx(t.operations),
+                    '  Total Expenses:     ' + ugx(t.materials + t.wages + t.operations),
+                    '  Funds Received:     ' + ugx(t.funds),
+                    '  Net Position:       ' + ugx(t.funds - t.cashExpense),
+                    '');
+
+                if (weekData && weekData.entries.length > 0) {
+                    lines.push('ENTRIES:', '----------------------------------------');
+                    weekData.entries.forEach((e, i) => {
+                        const prefix = isDetail ? (i + 1) + '. ' : '  ';
+                        lines.push(prefix + e.type.toUpperCase() + ': ' + e.description);
+                        if (isDetail) {
+                            lines.push('   Qty:     ' + e.quantity + ' ' + e.unit);
+                            lines.push('   Rate:    ' + ugx(e.rate) + ' / ' + e.unit);
+                            lines.push('   Amount:  ' + ugx(e.amount));
+                            lines.push('   Payment: ' + (e.paidBy || 'cash'));
+                            lines.push('   Date:    ' + new Date(e.date).toLocaleString());
+                        } else {
+                            if (e.quantity > 0) lines.push('  ' + e.quantity + ' ' + e.unit + ' @ ' + ugx(e.rate));
+                            lines.push('  Amount: ' + ugx(e.amount));
+                        }
+                        lines.push('');
+                    });
+                }
+
+            } else if (type === 'all') {
+                lines.push('', 'COMPLETE PROJECT REPORT', '----------------------------------------', '');
+                let proj = { materials: 0, wages: 0, operations: 0, funds: 0, cashExpense: 0 };
+                for (let w = 1; w <= 26; w++) {
+                    if (appData.weeks[w]) {
+                        const t = calculateWeek(w);
+                        proj.materials  += t.materials;
+                        proj.wages      += t.wages;
+                        proj.operations += t.operations;
+                        proj.funds      += t.funds;
+                        proj.cashExpense += t.cashExpense;
+                    }
+                }
+                const projExp = proj.materials + proj.wages + proj.operations;
+                const projNet = proj.funds - projExp;
+                lines.push('PROJECT TOTALS:',
+                    '  Total Materials:   ' + ugx(proj.materials),
+                    '  Total Wages:       ' + ugx(proj.wages),
+                    '  Total Operations:  ' + ugx(proj.operations),
+                    '  -----------------------------------',
+                    '  Total Expenses:    ' + ugx(projExp),
+                    '  Total Funds:       ' + ugx(proj.funds),
+                    '  ' + (projNet >= 0 ? 'Surplus:           ' : 'Deficit:           ') + ugx(Math.abs(projNet)),
+                    '',
+                    'WEEK BY WEEK:', '----------------------------------------');
+                for (let w = 1; w <= 26; w++) {
+                    if (appData.weeks[w]) {
+                        const t = calculateWeek(w);
+                        lines.push('Week ' + w + ':',
+                            '  Expenses: ' + ugx(t.materials + t.wages + t.operations),
+                            '  Funds:    ' + ugx(t.funds),
+                            '  Net:      ' + ugx(t.funds - t.cashExpense),
+                            '');
+                    }
+                }
+
+            } else { // summary
+                let proj = { materials: 0, wages: 0, operations: 0, funds: 0 };
+                for (let w = 1; w <= 26; w++) {
+                    if (appData.weeks[w]) {
+                        const t = calculateWeek(w);
+                        proj.materials  += t.materials;
+                        proj.wages      += t.wages;
+                        proj.operations += t.operations;
+                        proj.funds      += t.funds;
+                    }
+                }
+                const totalExp = proj.materials + proj.wages + proj.operations;
+                const net      = proj.funds - totalExp;
+                lines.push('', 'FINANCIAL SUMMARY', '----------------------------------------', '',
+                    'Total Expenses:  ' + ugx(totalExp),
+                    'Total Funds:     ' + ugx(proj.funds),
+                    'Status:          ' + (net >= 0 ? 'SURPLUS' : 'DEFICIT'),
+                    'Amount:          ' + ugx(Math.abs(net)));
+            }
+
+            lines.push('', '========================================', '  End of Report', '========================================');
+
+            const report = lines.join('\n');
+            document.getElementById('reportText').value = report;
+            document.getElementById('textReportArea').classList.remove('hidden');
+            document.getElementById('textReportArea').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyReportToClipboard() {
+            copyToClipboard(document.getElementById('reportText').value, 'Report copied! Paste into WhatsApp to share.');
+        }
+
+        function shareReportViaWhatsApp() {
+            window.open('https://wa.me/?text=' + encodeURIComponent(document.getElementById('reportText').value), '_blank');
+        }
+
+        function hideTextReport() {
+            document.getElementById('textReportArea').classList.add('hidden');
+        }
+
+        // ─────────────────────────────────────────────────────
+        //  Bootstrap
+        // ─────────────────────────────────────────────────────
+        window.onload = init;
+    </script>
+</body>
+</html>
