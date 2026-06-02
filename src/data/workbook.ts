@@ -1,6 +1,7 @@
 export interface WorkbookPart {
   id: string;
   title: string;
+  tabLabel: string;
   content: WorkbookBlock[];
 }
 
@@ -20,6 +21,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'week1',
     title: 'Week 1: Foundation and Flow State Activation',
+    tabLabel: 'Week 1',
     content: [
       { type: 'paragraph', text: 'Objective: Establish foundational practices for accessing flow state and understanding your current energy baseline.' },
       { type: 'heading', text: 'Exercise 1.1: Energy Baseline Assessment' },
@@ -62,6 +64,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'week2',
     title: 'Week 2: Emotional Alchemy and State Engineering',
+    tabLabel: 'Week 2',
     content: [
       { type: 'paragraph', text: 'Objective: Develop the ability to consciously transform limiting emotions into resourceful states.' },
       { type: 'heading', text: 'Exercise 2.1: Emotional Signature Mapping' },
@@ -100,6 +103,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'week3',
     title: 'Week 3: Chakra-Based Self-Reflection',
+    tabLabel: 'Week 3',
     content: [
       { type: 'paragraph', text: 'Objective: Engage in structured self-reflection and healing through chakra-based activities.' },
       { type: 'heading', text: 'Day 1: Gratitude and Safety (Root Chakra)' },
@@ -141,6 +145,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'week4',
     title: 'Week 4: Overcoming Self-Sabotage',
+    tabLabel: 'Week 4',
     content: [
       { type: 'paragraph', text: 'Objective: Identify and overcome self-sabotage patterns through the monster task method and self-forgiveness process.' },
       { type: 'heading', text: 'Exercise 4.1: Monster Task Protocol' },
@@ -201,6 +206,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'week5',
     title: 'Week 5: Authentic Living and Emotional Regulation',
+    tabLabel: 'Week 5',
     content: [
       { type: 'paragraph', text: 'Objective: Develop practices for authentic living and emotional regulation in daily life.' },
       { type: 'heading', text: 'Exercise 5.1: Authenticity Assessment' },
@@ -241,6 +247,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'week6',
     title: 'Week 6: Integration and Sustained Practice',
+    tabLabel: 'Week 6',
     content: [
       { type: 'paragraph', text: 'Objective: Integrate all practices and create a sustainable personal transformation plan.' },
       { type: 'heading', text: 'Exercise 6.1: Personal Transformation Plan' },
@@ -300,6 +307,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'advanced',
     title: 'Advanced Technique Worksheets',
+    tabLabel: 'Advanced',
     content: [
       { type: 'heading', text: 'Time Bending' },
       { type: 'paragraph', text: 'Practice the grandfather clock visualization for manipulating perceived time during tasks.' },
@@ -333,6 +341,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'identity-deep',
     title: 'Identity Deep Dive',
+    tabLabel: 'Identity',
     content: [
       { type: 'heading', text: 'Identity Rebirth and Inner Child Work' },
       { type: 'paragraph', text: 'Complete this process when you feel ready. Allow ample time. Have water nearby.' },
@@ -361,6 +370,7 @@ export const workbookParts: WorkbookPart[] = [
   {
     id: 'daily-templates',
     title: 'Daily Templates and Solutions',
+    tabLabel: 'Templates',
     content: [
       { type: 'heading', text: 'Daily Flow State Activation Ritual Template' },
       { type: 'paragraph', text: 'Morning Practice (10\u201315 minutes):' },

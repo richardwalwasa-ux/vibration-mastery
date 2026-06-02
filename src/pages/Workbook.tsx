@@ -7,18 +7,19 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { BookOpen } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-function WorkbookBlockRenderer({ block, idx }: { block: WorkbookBlock; idx: number }) {
+function WorkbookBlockRenderer({ block }: { block: WorkbookBlock }) {
   switch (block.type) {
     case 'paragraph':
-      return <p key={idx} className="text-[#2d2a26] leading-relaxed mb-4">{block.text}</p>
+      return <p className="text-[#2d2a26] leading-relaxed mb-4">{block.text}</p>
     case 'heading':
-      return <h2 key={idx} className="text-xl font-serif font-semibold text-[#6b3a5b] mt-8 mb-3">{block.text}</h2>
+      return <h2 className="text-xl font-serif font-semibold text-[#6b3a5b] mt-8 mb-3">{block.text}</h2>
     case 'subheading':
-      return <h3 key={idx} className="text-lg font-serif font-medium text-[#5a5248] mt-6 mb-2">{block.text}</h3>
+      return <h3 className="text-lg font-serif font-medium text-[#5a5248] mt-6 mb-2">{block.text}</h3>
     case 'bullet':
       return (
-        <ul key={idx} className="list-disc list-inside space-y-1.5 mb-4 text-[#2d2a26]">
+        <ul className="list-disc list-inside space-y-1.5 mb-4 text-[#2d2a26]">
           {block.items?.map((item, i) => (
             <li key={i} className="leading-relaxed pl-1">{item}</li>
           ))}
@@ -26,17 +27,17 @@ function WorkbookBlockRenderer({ block, idx }: { block: WorkbookBlock; idx: numb
       )
     case 'numbered':
       return (
-        <ol key={idx} className="list-decimal list-inside space-y-1.5 mb-4 text-[#2d2a26]">
+        <ol className="list-decimal list-inside space-y-1.5 mb-4 text-[#2d2a26]">
           {block.items?.map((item, i) => (
             <li key={i} className="leading-relaxed pl-1">{item}</li>
           ))}
         </ol>
       )
     case 'italic':
-      return <p key={idx} className="italic text-[#5a5248] mb-4 pl-4 border-l-2 border-[#b8860b]/40">{block.text}</p>
+      return <p className="italic text-[#5a5248] mb-4 pl-4 border-l-2 border-[#b8860b]/40">{block.text}</p>
     case 'fill':
       return (
-        <div key={idx} className="mb-4">
+        <div className="mb-4">
           {block.label && (
             <label className="block text-sm font-medium text-[#5a5248] mb-1.5">{block.label}</label>
           )}
@@ -48,7 +49,7 @@ function WorkbookBlockRenderer({ block, idx }: { block: WorkbookBlock; idx: numb
       )
     case 'table':
       return block.tableData ? (
-        <div key={idx} className="overflow-x-auto mb-6">
+        <div className="overflow-x-auto mb-6">
           <table className="w-full text-sm border border-[#d8d0c8] rounded-lg overflow-hidden">
             <thead className="bg-[#f0ebe3]">
               <tr>
@@ -73,7 +74,7 @@ function WorkbookBlockRenderer({ block, idx }: { block: WorkbookBlock; idx: numb
       ) : null
     case 'checkbox':
       return (
-        <div key={idx} className="space-y-2 mb-4">
+        <div className="space-y-2 mb-4">
           {block.items?.map((item, i) => (
             <label key={i} className="flex items-start gap-3 p-2 rounded-md hover:bg-[#6b3a5b]/5 transition-colors cursor-pointer">
               <Checkbox className="mt-0.5 border-[#7c9885] data-[state=checked]:bg-[#7c9885] data-[state=checked]:border-[#7c9885]" />
@@ -84,7 +85,7 @@ function WorkbookBlockRenderer({ block, idx }: { block: WorkbookBlock; idx: numb
       )
     case 'quote':
       return (
-        <Card key={idx} className="mb-6 bg-[#f0ebe3]/50 border-[#d8d0c8]">
+        <Card className="mb-6 bg-[#f0ebe3]/50 border-[#d8d0c8]">
           <CardContent className="p-5">
             <p className="text-[#5a5248] whitespace-pre-line text-sm leading-relaxed italic">{block.text}</p>
           </CardContent>
@@ -118,21 +119,26 @@ export default function Workbook() {
                 value={part.id}
                 className="data-[state=active]:bg-[#6b3a5b] data-[state=active]:text-white px-4 py-2 text-sm"
               >
-                {part.id.startsWith('week') ? `W${part.id.replace('week', '')}` : part.title.split(':')[0]}
+                {part.tabLabel}
               </TabsTrigger>
             ))}
           </TabsList>
         </ScrollArea>
 
         {workbookParts.map((part) => (
-          <TabsContent key={part.id} value={part.id} className="mt-0">
+          <TabsContent
+            key={part.id}
+            value={part.id}
+            forceMount
+            className={cn('mt-0', part.id !== activeTab && 'hidden')}
+          >
             <div className="max-w-3xl mx-auto">
               <div className="mb-6">
                 <h2 className="text-2xl font-serif font-bold text-[#6b3a5b] mb-2">{part.title}</h2>
               </div>
               <div className="space-y-2">
                 {part.content.map((block, bi) => (
-                  <WorkbookBlockRenderer key={bi} block={block} idx={bi} />
+                  <WorkbookBlockRenderer key={bi} block={block} />
                 ))}
               </div>
             </div>

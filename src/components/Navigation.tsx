@@ -40,7 +40,10 @@ export default function Navigation() {
 
           <button
             className="md:hidden p-2 text-[#5a5248] hover:text-[#6b3a5b]"
-            onClick={() => setOpen(!open)}
+            aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            onClick={() => setOpen(prev => !prev)}
           >
             {open ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -48,7 +51,7 @@ export default function Navigation() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-[#d8d0c8] bg-[#faf7f2]/95 backdrop-blur-md">
+        <div id="mobile-nav" className="md:hidden border-t border-[#d8d0c8] bg-[#faf7f2]/95 backdrop-blur-md">
           <div className="px-4 py-3 space-y-1">
             {links.map((l) => (
               <Link
